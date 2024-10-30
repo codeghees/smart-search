@@ -4,6 +4,8 @@ from serpapi import GoogleSearch
 from dotenv import load_dotenv
 import os
 import json
+from scraper import WebScraper
+from analyzer import ContentAnalyzer
 
 # Load environment variables
 load_dotenv()
@@ -26,37 +28,46 @@ def perform_search(query, num_results=5):
         "num": num_results
     })
     results = search.get_dict()
-    print(f"Raw Results JSON: {json.dumps(results, indent=2)}")
+    # print(f"Raw Results JSON: {json.dumps(results, indent=2)}")
     return results.get('organic_results', []), json.dumps(results, indent=2)
 
-def analyze_results(query, results, raw_results):
-    """Analyze search results using Claude"""
-    prompt = f"""Here are the search results for the query "{query}":
+def process_search_results(query, results, raw_results):
+    """Process search results including web scraping and analysis"""
+    scraper = WebScraper()
+    analyzer = ContentAnalyzer(claude)
     
-Raw Results JSON: {raw_results}
+    # Scrape content from each URL
+    scraped_contents = []
+    analyzed_contents = []
+    with st.spinner("Scraping webpage contents..."):
+        for result in results:
+            content = scraper.scrape_url(result['link'])
+            scraped_contents.append(content)
+            
+    # Analyze individual pages
+    
+    for content in scraped_contents:
+        if content['status'] == 'success':
+            with st.expander(f"Analysis: {content['domain']}"):
+                analysis = analyzer.analyze_single_page(content)
+                analyzed_contents.append({
+                    'url': content['url'],
+                    'domain': content['domain'],
+                    'content': analysis,
+                    'status': 'success'
+                })
+                # st.markdown(analysis)
+                
+    # Comprehensive analysis across all pages
+    st.subheader("Comprehensive Analysis")
+    comprehensive_analysis = analyzer.analyze_multiple_pages(analyzed_contents, query, raw_results)
+    st.markdown(comprehensive_analysis)
 
-Please analyze these results and provide:
-1. A brief summary of the main findings
-2. Key highlights or important points
-3. Any relevant insights or patterns noticed
-4. Use specific information from the provided JSON where relevant
+    st.subheader("Individual Page Analyses")
+    for content in analyzed_contents:
+        with st.expander(f"**{content['domain']}**"):
+            st.markdown(content['content'])
 
-Format your entire response in Markdown, using appropriate headers, lists, and emphasis where needed.
-Keep the response concise and informative."""
-
-    print(f"Sending to Claude - Query: {query}")
-    print(f"Results being analyzed: {json.dumps(results, indent=2)}")
-
-    response = claude.messages.create(
-        model="claude-3-sonnet-20240229",
-        max_tokens=500,
-        temperature=0,
-        messages=[
-            {"role": "user", "content": prompt}
-        ]
-    )
-    print(f"Claude's response: {response.content}")
-    return response.content[0].text
 
 # App title and description
 st.title("🔍 Smart Search Engine")
@@ -75,18 +86,16 @@ if st.button("Search"):
             # Perform search
             results, raw_results = perform_search(query, num_results)
             
-            # AI Analysis
-            st.subheader("AI Analysis")
-            analysis = analyze_results(query, results, raw_results)
-            st.markdown(analysis)
+            # Process and analyze results
+            process_search_results(query, results, raw_results)
             
             # Search Results Links
-            st.markdown("---")
-            st.subheader("Search Results")
-            for result in results:
-                st.markdown(f"[{result['title']}]({result['link']})")
-                st.markdown(f"> {result['snippet']}")
-                st.markdown("---")
+            # st.markdown("---")
+            # st.subheader("Search Results")
+            # for result in results:
+            #     st.markdown(f"[{result['title']}]({result['link']})")
+            #     st.markdown(f"> {result['snippet']}")
+            #     st.markdown("---")
     else:
         st.warning("Please enter a search query")
 
