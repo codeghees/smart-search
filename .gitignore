@@ -1,2 +1,4 @@
 .env
 .vscode/
+markdown/
+__pycache__/
