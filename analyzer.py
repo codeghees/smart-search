@@ -46,21 +46,19 @@ Format your response in Markdown, ensuring all key details are preserved for cro
             if content['status'] == 'success':
                 summaries.append(f"Content from {content['url']}:\n{content['content'][:5000]}")
 
-        prompt = f"""Analyze these webpage contents related to the search query "{original_query}":
+        prompt = f"""Analyze these webpage contents for the search query "{original_query}":
 
-Raw Results JSON (from SERP API for additional context): {raw_results} 
+Raw Results JSON: {raw_results}
 
 {''.join(summaries)}
-These results are summaries of the content from the webpages. Lean heavily on this for your analysis.
-Please provide:
-1. A comprehensive summary of findings across all sources
-2. Common themes or patterns
-3. Any contradictions or differences between sources
-4. Most reliable or authoritative information found
-5. Recommendations for further research
-6. Keep the response concise and informative. Don't use too many headers.
 
-Format your response in Markdown with appropriate headers and lists."""
+Write a crisp, focused summary that:
+1. Synthesizes key information from all sources
+2. Highlights important data points and facts
+3. Notes any major differences between sources
+4. Identifies the most credible information
+
+Keep the response concise and factual. Format in Markdown."""
 
         response = self.claude.messages.create(
             model="claude-3-sonnet-20240229",
