@@ -1,4 +1,5 @@
 .env
 .vscode/
 markdown/
+interactions/
 __pycache__/

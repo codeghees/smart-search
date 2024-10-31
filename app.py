@@ -72,7 +72,7 @@ def process_search_results(query, results, raw_results):
 # App title and description
 st.title("🔍 Smart Search Engine")
 st.markdown("""
-This search engine combines SERP API for web results with Claude's analysis capabilities
+This search engine combines a search API for web results with Claude's analysis capabilities
 to provide intelligent insights about your search query.
 """)
 

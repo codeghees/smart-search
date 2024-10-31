@@ -38,7 +38,7 @@ class WebScraper:
             return {
                 'url': url,
                 'domain': urlparse(url).netloc,
-                'content': '',
+                'content': f'Error scraping content from {url} \n\n {str(e)}',
                 'status': 'error',
                 'error': str(e)
             }
