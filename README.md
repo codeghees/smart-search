@@ -16,6 +16,7 @@ A powerful search engine that combines SERP API for web results with Claude's AI
 - Python 3.8+
 - SERP API key
 - Claude API key
+- Firecrawl API key
 
 ## Installation
 
